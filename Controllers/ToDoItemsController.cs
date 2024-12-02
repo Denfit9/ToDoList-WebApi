@@ -9,7 +9,7 @@ using ToDoList.Models;
 
 namespace ToDoList.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/ToDoItems")]
     [ApiController]
     public class ToDoItemsController : ControllerBase
     {
@@ -24,6 +24,19 @@ namespace ToDoList.Controllers
         public async Task<ActionResult<IEnumerable<ToDoItem>>> GetTodoItems()
         {
             return await _context.TodoItems.ToListAsync();
+        }
+
+        [HttpGet("UnfinishedEvents")]
+        public async Task<ActionResult<IEnumerable<ToDoItem>>> GetAwaitingItems()
+        {
+            return await _context.TodoItems.Where(x => x.IsComplete == false).ToListAsync();
+        }
+
+        [HttpGet("UnfinishedEventsCount")]
+        public async Task<ActionResult<int>> GetAwaitingItemsCount()
+        {
+            int count = await _context.TodoItems.CountAsync(x => !x.IsComplete);
+            return Ok(count);
         }
 
         [HttpGet("{id}")]
@@ -74,7 +87,7 @@ namespace ToDoList.Controllers
             _context.TodoItems.Add(toDoItem);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetToDoItem", new { id = toDoItem.Id }, toDoItem);
+            return CreatedAtAction(nameof(GetToDoItem), new { id = toDoItem.Id }, toDoItem);
         }
 
         [HttpDelete("{id}")]
